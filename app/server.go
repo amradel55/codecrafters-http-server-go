@@ -84,6 +84,17 @@ func handleGetRequest(conn net.Conn, path string, headers map[string]string) {
 		userAgent := headers["User-Agent"]
 		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(userAgent), userAgent)
 		conn.Write([]byte(response))
+	} else if strings.HasPrefix(path, "/files/") {
+		dir := os.Args[2]
+		fileName := strings.TrimPrefix(path, "/files/")
+		data, err := os.ReadFile(dir + fileName)
+		response := ""
+		if err != nil {
+			response = "HTTP/1.1 404 Not Found\r\n\r\n"
+		} else {
+			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(data), data)
+		}
+		conn.Write([]byte(response))
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
