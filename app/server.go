@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net"
 	"os"
@@ -98,6 +100,11 @@ func handleGetRequest(conn net.Conn, path string, headers map[string]string, dir
 		encoding, ok := headers["Accept-Encoding"]
 		if ok && strings.Contains(encoding, "gzip") {
 			encoding = "gzip"
+			var buffer bytes.Buffer
+			w := gzip.NewWriter(&buffer)
+			w.Write([]byte(message))
+			w.Close()
+			message = buffer.String()
 			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encoding, len(message), message)
 		} else {
 			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)
