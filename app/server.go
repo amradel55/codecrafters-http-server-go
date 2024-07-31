@@ -96,7 +96,8 @@ func handleGetRequest(conn net.Conn, path string, headers map[string]string, dir
 		message := strings.TrimPrefix(path, "/echo/")
 		response := ""
 		encoding, ok := headers["Accept-Encoding"]
-		if ok && encoding == "gzip" {
+		if ok && strings.Contains(encoding, "gzip") {
+			encoding = "gzip"
 			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encoding, len(message), message)
 		} else {
 			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)
