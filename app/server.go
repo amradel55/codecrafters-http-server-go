@@ -94,7 +94,14 @@ func handleGetRequest(conn net.Conn, path string, headers map[string]string, dir
 		conn.Write([]byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nWelcome to the homepage!"))
 	} else if strings.HasPrefix(path, "/echo/") {
 		message := strings.TrimPrefix(path, "/echo/")
-		response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)
+		response := ""
+		encoding, ok := headers["Accept-Encoding"]
+		if ok && encoding == "gzip" {
+			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: %s\r\nContent-Length: %d\r\n\r\n%s", encoding, len(message), message)
+		} else {
+			response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)
+
+		}
 		conn.Write([]byte(response))
 	} else if strings.HasPrefix(path, "/user-agent") {
 		userAgent := headers["User-Agent"]
